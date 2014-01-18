@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="nl.mprog.apps.hangman"
+    android:versionCode="1"
+    android:versionName="1.0" >
+
+    <uses-sdk
+        android:minSdkVersion="11"
+        android:targetSdkVersion="19" />
+
+    <application
+        android:allowBackup="true"
+        android:icon="@drawable/hangman"
+        android:label="Hangman"
+        android:theme="@style/Theme.Hangman" >
+        <activity
+            android:name="nl.mprog.apps.hangman.MainActivity"
+            android:label="Hangman" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name="nl.mprog.apps.hangman.showAbout"
+            android:label="@string/title_activity_show_about"
+            android:theme="@android:style/Theme.Dialog"
+            android:parentActivityName="nl.mprog.apps.hangman.MainActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="nl.mprog.apps.hangman.MainActivity" />
+        </activity>
+        <activity
+            android:name="nl.mprog.apps.hangman.Game"
+            android:label="@string/title_activity_game"
+            android:windowSoftInputMode="stateAlwaysVisible"
+            android:parentActivityName="nl.mprog.apps.hangman.MainActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="nl.mprog.apps.hangman.MainActivity" />
+        </activity>
+        <activity
+            android:name="nl.mprog.apps.hangman.Settings"
+            android:label="@string/title_activity_settings"
+            android:parentActivityName="nl.mprog.apps.hangman.MainActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="nl.mprog.apps.hangman.MainActivity" />
+        </activity>
+    </application>
+
+</manifest>
