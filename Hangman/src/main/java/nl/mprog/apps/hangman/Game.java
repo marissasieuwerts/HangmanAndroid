@@ -1,25 +1,19 @@
 package nl.mprog.apps.hangman;
 
 import android.app.Dialog;
-import android.content.Intent;
 import android.content.res.Resources;
-import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.KeyEvent;
-import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.app.Activity;
 import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import java.util.Random;
 
-public class Game extends Activity implements View.OnClickListener{
+public class Game extends Activity implements View.OnClickListener
+{
 
     /**
      * Initialize a new game
@@ -28,29 +22,33 @@ public class Game extends Activity implements View.OnClickListener{
     // views in activity_game.xml
     private static final String TAG = "Game";
     private TextView word;
-    private String mysteryWord;
+    private String secretWord;
     private static final Random rgenerator = new Random();
 
-    private TextView guesses_left;
-
-    // initialize dialog for saving purposes
+    // initialize dialog for alerts
     private Dialog dialog;
     private int currentDialogId;
-
-    private TextView wrongLetters;
-    private int wrongGuesses;
-
     static final int DIALOG_WIN_ID = 1;
     static final int DIALOG_LOSE_ID = 2;
 
-    // variables for settings
-    public static String KEY_DIFFICULTY;
-    int lives; // 0 for easy, 1 for medium, 2 for hard
-    int difficulty;
-
+    // variables to display information in game
+    private TextView wrongLetters;
+    private int wrongGuesses;
     TextView numGuessed;
     TextView guessAllowed;
 
+    // variables for settings and saving
+    public static String KEY_DIFFICULTY;
+    int lives;
+    // -1 for load, 0 for easy, 1 for medium, 2 for hard
+    private int difficulty;
+
+    // variables for saving purposes
+    public static final String SAVE_WRONGLETTERS = "wrongletters";
+    public static final String SAVE_SECRETWORD = "secretWord";
+    public static final String SAVE_WRONGGUESSES = "wrongGuesses";
+    public static final String SAVE_WORD = "word";
+    public static final String SAVE_LIVES = "lives";
 
 
     /*
@@ -58,23 +56,22 @@ public class Game extends Activity implements View.OnClickListener{
      */
 
     @Override
-    protected void onCreate(Bundle savedInstanceState){
+    protected void onCreate(Bundle savedInstanceState)
+    {
         super.onCreate(savedInstanceState);
-        Intent i = getIntent();
-        Intent k = getIntent();
         setContentView(R.layout.activity_game);
 
-        //getting difficulty level
+     // getting difficulty level
      difficulty = getIntent().getIntExtra(KEY_DIFFICULTY, -1);
      lives = setDifficulty(difficulty); //set mode
 
     // launch 'board'
     bindViews();
 
-     // pick a random word from words.xml
-     Resources res = getResources();
-     String[] mystring = res.getStringArray(R.array.words_small);
-     mysteryWord = mystring[rgenerator.nextInt(mystring.length)];
+    // pick a random word from words.xml
+    Resources res = getResources();
+    String[] mystring = res.getStringArray(R.array.words_small);
+    secretWord = mystring[rgenerator.nextInt(mystring.length)];
 
      // Convert this to underscores
     initWord();
@@ -82,7 +79,11 @@ public class Game extends Activity implements View.OnClickListener{
     // initialize number of wrong guesses
     initWrongGuesses();
 
+    // initialize number of guesses used
     initGuesses();
+
+    // load previously saved game
+    loadGame();
 }
 
     /*
@@ -90,18 +91,21 @@ public class Game extends Activity implements View.OnClickListener{
      */
 
     // set wrong guesses 0
-    private void initWrongGuesses() {
+    private void initWrongGuesses()
+    {
         wrongGuesses = 0;
         wrongLetters.setText("");
     }
 
     // set secret word to underscores
-    private void initWord() {
+    private void initWord()
+    {
         word.setText(underscore());
     }
 
     // initialize number of used guesses and number of guesses allowed, make them string types instead of ints
-    private void initGuesses(){
+    private void initGuesses()
+    {
         numGuessed.setText(String.valueOf(wrongGuesses));
         guessAllowed.setText(String.valueOf(lives));
 
@@ -109,13 +113,14 @@ public class Game extends Activity implements View.OnClickListener{
 
 
     /*
-    ** convert textview word to underscores
+    ** convert textview word to underscores using StringBuffer method
      */
 
     private String underscore()
     {
         StringBuffer result = new StringBuffer();
-        for (int i = 0; i < mysteryWord.length(); i++) {
+        for (int i = 0; i < secretWord.length(); i++)
+        {
             result.append("_ ");
         }
         return result.toString();
@@ -126,7 +131,8 @@ public class Game extends Activity implements View.OnClickListener{
     ** Bind all views in activity_game.xml to the right attribute
      */
 
-    private void bindViews() {
+    private void bindViews()
+    {
         word = (TextView) this.findViewById(R.id.word);
         wrongLetters = (TextView)
                 this.findViewById(R.id.wrongletters);
@@ -135,75 +141,16 @@ public class Game extends Activity implements View.OnClickListener{
 
     }
 
-    /*
-    ** Initialize dialog to display messages
-     */
-
-    protected Dialog onCreateDialog(int id) {
-
-        // variables to display
-        TextView endmessage;
-        Button endgame;
-
-        switch (id)
-        {
-            // in case player won the game
-            case DIALOG_WIN_ID:
-                currentDialogId = id;
-                dialog = new Dialog(Game.this);
-                dialog.setContentView(R.layout.end_dialog);
-                dialog.setTitle("Game Over");
-                endmessage = (TextView)
-                        dialog.findViewById(R.id.endmessage);
-                endgame = (Button)
-                        dialog.findViewById(R.id.endgame);
-                endmessage.setText("You Won!");
-                endgame.setText("Back to main");
-                endgame.setOnClickListener(this);
-                break;
-            case DIALOG_LOSE_ID:
-                currentDialogId = id;
-                // do the work to define the LOSE Dialog
-                dialog = new Dialog(Game.this);
-                dialog.setContentView(R.layout.end_dialog);
-                dialog.setTitle("Game Over");
-                endmessage = (TextView)
-                        dialog.findViewById(R.id.endmessage);
-                endgame = (Button)
-                        dialog.findViewById(R.id.endgame);
-                endmessage.setText("You Lose!");
-                endgame.setText("Back To Main");
-                endgame.setOnClickListener(this);
-                break;
-            default:
-                dialog = null;
-        }
-        return dialog;
-    }
-
-
 
     /*
-     ** handles button clicks in dialog
-      */
-
-    @Override
-    public void onClick(View view) {
-        Log.d(TAG, "clicked on " + view.getId());
-        switch (view.getId()) {
-            case R.id.endgame:
-                finish();
-                break;
-        }
-    }
-
-    /*
-    ** settings
+    ** Settings
      */
 
     // set number of guesses depending on what mode the user chose
-    private int setDifficulty(int difficulty) {
-        switch(difficulty) {
+    private int setDifficulty(int difficulty)
+    {
+        switch(difficulty)
+        {
             // 8 guesses for easy mode
             case 0:
                 return 8;
@@ -218,16 +165,46 @@ public class Game extends Activity implements View.OnClickListener{
     }
 
 
+    /*
+    ** loads game if there is a save file
+     */
+
+    private void loadGame()
+    {
+        // difficulty = -1 loads saved data
+        if(difficulty == -1)
+        {
+            // get preferences from intent and update textviews
+            secretWord = getPreferences(MODE_PRIVATE).getString(SAVE_SECRETWORD, secretWord);
+            word.setText(getPreferences(MODE_PRIVATE).getString(SAVE_WORD, underscore()));
+            wrongLetters.setText(getPreferences(MODE_PRIVATE).getString(SAVE_WRONGLETTERS, ""));
+            wrongGuesses = getPreferences(MODE_PRIVATE).getInt(SAVE_WRONGGUESSES, wrongGuesses);
+            lives = getPreferences(MODE_PRIVATE).getInt(SAVE_LIVES, lives);
+        }
+        // restore empty spaces
+        else
+        {
+            word.setText(underscore());
+        }
+
+        // restore wrong guesses and lives count
+        initGuesses();
+        getIntent().putExtra(KEY_DIFFICULTY, -1);
+    }
+
 
     // Actual game logic
 
     /*
     *   handles keyboard input and calls validate function for each key event
-    *   Another button than A-Z will be ignored
+    *   Another button than A-Z will be (silently) ignored
      */
+
     @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event) {
-        switch (keyCode) {
+    public boolean onKeyDown(int keyCode, KeyEvent event)
+    {
+        switch (keyCode)
+        {
             case KeyEvent.KEYCODE_A:
                 validate('A');
                 break;
@@ -320,7 +297,7 @@ public class Game extends Activity implements View.OnClickListener{
     private void validate(char guesses_left)
     {
         // check if there are any guesses left
-        if (mysteryWord.indexOf(guesses_left) == -1)
+        if (secretWord.indexOf(guesses_left) == -1)
         {
             String wrongLetters_t = wrongLetters.getText().toString();
             // update guesses
@@ -329,7 +306,7 @@ public class Game extends Activity implements View.OnClickListener{
                 // Letter not found in word
                 if (wrongGuesses < lives)
                 {
-
+                    // update count
                     wrongGuesses++;
                     updatenumWrongGuesses(guesses_left);
                 }
@@ -337,13 +314,13 @@ public class Game extends Activity implements View.OnClickListener{
                 Lose();
             }
 
+            // update views
             initGuesses();
         }
 
-
         // if there aren't any guesses left, update word with the guessed letter and check if player won or lost
-
-        else{
+        else
+        {
                 if (wrongGuesses < lives)
                 {
                     // update views and check for win
@@ -352,28 +329,33 @@ public class Game extends Activity implements View.OnClickListener{
                 }
                 else
                 {
+                    // call lose function
                     Lose();
                 }
-            }
+        }
     }
 
+
     /*
-    ** Update view after guessing
+    ** Update view of the secret word after guessing
      */
 
-    private void updateWord(char ch) {
+    private void updateWord(char ch)
+    {
+        // set to char
         char[] updatedWord = word.getText().toString().toCharArray();
-        for (int i = 0; i < mysteryWord.length(); i++) {
-            if (ch == mysteryWord.charAt(i)) {
-                updatedWord[i * 2] = mysteryWord.charAt(i);
+        for (int i = 0; i < secretWord.length(); i++)
+        {
+            if (ch == secretWord.charAt(i)) {
+                updatedWord[i * 2] = secretWord.charAt(i);
             }
         }
         word.setText(new String(updatedWord));
     }
 
-
     // bind updated view of guessed letters to view
-    private void updatenumWrongGuesses(char ch) {
+    private void updatenumWrongGuesses(char ch)
+    {
         wrongLetters.setText(wrongLetters.getText() + Character.toString(ch));
     }
 
@@ -381,11 +363,14 @@ public class Game extends Activity implements View.OnClickListener{
     /*
     **  Check if player won game and show message
      */
-    private void Win() {
-        if (word.getText().toString().indexOf("_ ") == -1) {
+    private void Win()
+    {
+        if (word.getText().toString().indexOf("_ ") == -1)
+        {
             showDialog(DIALOG_WIN_ID);
         }
     }
+
 
     /*
     ** Check if player lost game and show message
@@ -393,30 +378,98 @@ public class Game extends Activity implements View.OnClickListener{
 
     private void Lose()
     {
-        if (wrongGuesses == lives) {
+        if (wrongGuesses == lives)
+        {
             showDialog(DIALOG_LOSE_ID);
         }
     }
 
 
-    /**
-     * A placeholder fragment containing a simple view.
+    /*
+    ** called when application goes to 'background' or when player hits home button
      */
-    public static class PlaceholderFragment extends Fragment {
 
-        public PlaceholderFragment() {
-        }
+    protected void onPause()
+    {
+        super.onPause();
+        Log.d(TAG, "onPause");
 
-        @Override
-        public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                Bundle savedInstanceState) {
-            View rootView = inflater.inflate(R.layout.fragment_game, container, false);
-            return rootView;
-        }
+        // save current secret word
+        getPreferences(MODE_PRIVATE).edit().putString(SAVE_SECRETWORD, secretWord).commit();
+        // save the state of the secret word
+        getPreferences(MODE_PRIVATE).edit().putString(SAVE_WORD, word.getText().toString()).commit();
+        // save the letters that were guessed and were wrong
+        getPreferences(MODE_PRIVATE).edit().putString(SAVE_WRONGLETTERS, wrongLetters.getText().toString()).commit();
+        // save the number of wrong guesses
+        getPreferences(MODE_PRIVATE).edit().putInt(SAVE_WRONGGUESSES, wrongGuesses).commit();
+        // save the number of lives
+        getPreferences(MODE_PRIVATE).edit().putInt(SAVE_LIVES, lives).commit();
+
+        // intent is used when player clicks the continue button on the home screen
+        getIntent().putExtra(KEY_DIFFICULTY, -1);
     }
 
+
+    /*
+    ** Initialize dialog to display messages
+     */
+
+    protected Dialog onCreateDialog(int id) {
+
+        // variables to display
+        TextView endmessage;
+        Button endgame;
+
+        switch (id)
+        {
+            // in case player won the game
+            case DIALOG_WIN_ID:
+                currentDialogId = id;
+                dialog = new Dialog(Game.this);
+                dialog.setContentView(R.layout.end_dialog);
+                dialog.setTitle("Game Over");
+                endmessage = (TextView)
+                        dialog.findViewById(R.id.endmessage);
+                endgame = (Button)
+                        dialog.findViewById(R.id.endgame);
+                endmessage.setText("You Win!");
+                endgame.setText("Back to main");
+                endgame.setOnClickListener(this);
+                break;
+            // lose
+            case DIALOG_LOSE_ID:
+                currentDialogId = id;
+                dialog = new Dialog(Game.this);
+                dialog.setContentView(R.layout.end_dialog);
+                dialog.setTitle("Game Over");
+                endmessage = (TextView)
+                        dialog.findViewById(R.id.endmessage);
+                endgame = (Button)
+                        dialog.findViewById(R.id.endgame);
+                endmessage.setText("You Lose!");
+                endgame.setText("Back To Main");
+                endgame.setOnClickListener(this);
+                break;
+            default:
+                dialog = null;
+        }
+        return dialog;
+    }
+
+
+    /*
+     ** handles button clicks in dialog
+      */
+
     @Override
-    public void onBackPressed() {
-        return;
+    public void onClick(View view)
+    {
+        Log.d(TAG, "clicked on " + view.getId());
+        switch (view.getId())
+        {
+            case R.id.endgame:
+                finish();
+                break;
+        }
     }
 }

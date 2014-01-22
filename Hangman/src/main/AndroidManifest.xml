@@ -40,14 +40,6 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="nl.mprog.apps.hangman.MainActivity" />
         </activity>
-        <activity
-            android:name="nl.mprog.apps.hangman.Settings"
-            android:label="@string/title_activity_settings"
-            android:parentActivityName="nl.mprog.apps.hangman.MainActivity" >
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="nl.mprog.apps.hangman.MainActivity" />
-        </activity>
     </application>
 
 </manifest>

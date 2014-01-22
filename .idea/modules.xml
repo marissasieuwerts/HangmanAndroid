@@ -4,6 +4,7 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/Hangman/Hangman.iml" filepath="$PROJECT_DIR$/Hangman/Hangman.iml" />
       <module fileurl="file://$PROJECT_DIR$/Hangman-master.iml" filepath="$PROJECT_DIR$/Hangman-master.iml" />
+      <module fileurl="file://$PROJECT_DIR$/Hangman-master copy.iml" filepath="$PROJECT_DIR$/Hangman-master copy.iml" />
       <module fileurl="file://$PROJECT_DIR$/HangmanProject.iml" filepath="$PROJECT_DIR$/HangmanProject.iml" />
     </modules>
   </component>

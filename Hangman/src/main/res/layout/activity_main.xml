@@ -38,7 +38,7 @@
 
         <Button android:layout_height="wrap_content"
             android:id="@+id/continuebtn"
-            android:text="@string/button_continue" android:layout_width="100dip"
+            android:text="@string/continuebtn" android:layout_width="100dip"
             android:layout_below="@+id/title"
             android:layout_centerHorizontal="false"
             android:layout_centerInParent="false"
